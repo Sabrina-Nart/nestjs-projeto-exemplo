@@ -1,9 +1,9 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import dataSource from './data-source';
+import { dataSourceOptions } from './data-source';
 
-export const DataSourceOptionsSeed: DataSourceOptions = {
-    ...DataSourceOptions,
-    migrations: ['dist/db/seeds/*.js'],
+export const dataSourceOptionsSeed: DataSourceOptions = {
+  ...dataSourceOptions,
+  migrations: ['dist/db/seeds/*.js'],
 };
 
-export default new DataSource(DataSourceOptionsSeed);
+export default new DataSource(dataSourceOptionsSeed);
