@@ -41,3 +41,4 @@ Claro! O código que você compartilhou é um teste de integração (end-to-end)
 
 Em resumo, este teste verifica se o endpoint raiz do controlador `AppController` retorna a saudação "Hello World!" com sucesso.
 */
+
