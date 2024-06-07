@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import {
-        BadRequestException,
-        Injectable,
-        NotFoundException,
+    BadRequestException,
+    Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 
 import { Repository } from 'typeorm';
@@ -10,31 +10,34 @@ import { AutorEntity } from './autor.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AutorDto } from './autor.dto';
   
-//No Service ficam as regras de3 negócio
-
 @Injectable()
 export class AutorService {
-    constructor(
-
-        @InjectRepository(AutorEntity)
-        private autorRepository: Repository<AutorEntity>,
-    ) {}
+        constructor(
+            @InjectRepository(AutorEntity)
+            private autorRepository: Repository<AutorEntity>,
+        ) {}
     
-    findAll() {
-        return this.autorRepository.find();
-    }
-    
-    async findById(id: string): Promise<AutorEntity> {
-        const findOne = await this.autorRepository.findOne({ where: { id } });
-
-        if (!findOne) {
-            throw new NotFoundException('Autor não encontrado com o id ' + id);
+        findAll() {
+            return this.autorRepository.find({
+                relations: { livros: true },
+            });
         }
+    
+        async findById(id: string): Promise<AutorEntity> {
+            const findOne = await this.autorRepository.findOne({
+                where: { id },
+                relations: { livros: true },
+            });
+
+            if (!findOne) {
+                throw new NotFoundException('Autor não encontrado com o id ' + id);
+            }
             return findOne;
         }
     
         async remove(id: string) {
             const findById = await this.findById(id);
+
             await this.autorRepository.remove(findById);
             return { ...findById, id };
         }
@@ -60,7 +63,7 @@ export class AutorService {
             // this.validateAutorLivros
         }
     
-        private validateAutorNascimento(autor: AutorEntity) {
+        private validateAutorNascimento(autor: AutorEntity | AutorDto) {
             const dataAtual = new Date();
             const dataNascimento = new Date(autor.dataNascimento);
 
@@ -71,26 +74,24 @@ export class AutorService {
             //   throw new BadRequestException('O autor deve ter no mínimo 18 anos')
             // }
 
-            const diferencaAno = dataAtual.getUTCFullYear() - dataNascimento.getUTCFullYear();
+        const diferencaAno = dataAtual.getUTCFullYear() - dataNascimento.getUTCFullYear();
 
             if (diferencaAno < 18) {
                 throw new BadRequestException('O autor deve ter no mínimo 18 anos');
             } else if (diferencaAno === 18) {
-                const meses = dataAtual.getUTCMonth() + 1 - (dataNascimento.getUTCMonth() + 1);
+                const meses =
+                dataAtual.getUTCMonth() + 1 - (dataNascimento.getUTCMonth() + 1);
 
                 if (meses < 0) {
-                    throw new BadRequestException(
-                        `O autor deve ter no mínimo 18 anos (faltam ainda ${meses * -1} mes(es))`,
-                    );
+                    throw new BadRequestException(`O autor deve ter no mínimo 18 anos (faltam ainda ${meses * -1} mes(es))`,);
+
                 } else if (dataAtual.getUTCMonth() - dataNascimento.getUTCMonth() === 0) {
                     const dias = dataAtual.getUTCDate() - dataNascimento.getUTCDate();
 
                     if (dias < 0) {
-                        throw new BadRequestException(
-                            `O autor deve ter no mínimo 18 anos (faltam ainda ${dias * -1} dia(s))`,
-                        );
+                        throw new BadRequestException(`O autor deve ter no mínimo 18 anos (faltam ainda ${dias * -1} dia(s))`,);
                     }
                 }
             }
-    }
+        }
 }
